@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="정리되지 않은 요청을 지식베이스의 기법 선택 규칙에 따라 마스터 프롬프트로 조립합니다. 결과를 어떤 챗 모델에든 붙여넣어 쓸 수 있습니다.">
+<meta property="og:title" content="마스터 프롬프트 조립기">
+<meta property="og:description" content="정리되지 않은 요청을 지식베이스의 기법 선택 규칙에 따라 마스터 프롬프트로 조립합니다. 결과를 어떤 챗 모델에든 붙여넣어 쓸 수 있습니다.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23B9845A'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23D9B08C'/%3E%3C/svg%3E">
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}</style>
+<title>마스터 프롬프트 조립기</title>
+<style>
+  /* ============================================================
+     Fired Clay Workbench — Claymorphism design system
+     단일 시각 세계로 확정. 뷰어 테마 토글에도 동일하게 렌더링되도록
+     모든 테마 선택자에 같은 토큰을 정의한다.
+     ============================================================ */
+
+  :root,
+  :root[data-theme="dark"],
+  :root[data-theme="light"] {
+    --bg: #F7F1E7;
+    --surface: #EFE4D2;
+    --primary: #B9845A;
+    --primary-hover: #A5724E;
+    --accent: #D9B08C;
+    --text: #2F2A24;
+    --text-2: #6E6258;
+    --border: #DDD2C2;
+    --sh-light: rgba(255, 255, 255, 0.6);
+    --sh-dark: rgba(60, 40, 20, 0.18);
+
+    --clay-raise:
+      10px 10px 24px var(--sh-dark),
+      -8px -8px 20px var(--sh-light),
+      inset 2px 2px 4px rgba(255, 255, 255, .55),
+      inset -4px -4px 10px rgba(60, 40, 20, .07);
+
+    /* 최상위 표면(masthead·card·note)과 그 안의 조작 요소를 같은 높이로 두면
+       위계가 사라진다. 중첩 요소는 한 단계 낮은 --clay-raise-sm 을 쓴다. */
+    --clay-raise-sm:
+      6px 6px 14px var(--sh-dark),
+      -5px -5px 12px var(--sh-light),
+      inset 2px 2px 4px rgba(255, 255, 255, .55),
+      inset -3px -3px 7px rgba(60, 40, 20, .06);
+
+    --clay-raise-hi:
+      14px 14px 32px var(--sh-dark),
+      -10px -10px 26px var(--sh-light),
+      inset 2px 2px 4px rgba(255, 255, 255, .55),
+      inset -4px -4px 10px rgba(60, 40, 20, .07);
+
+    --clay-inset:
+      inset 6px 6px 14px rgba(60, 40, 20, .16),
+      inset -5px -5px 12px rgba(255, 255, 255, .72);
+
+    --clay-press:
+      inset 4px 4px 10px rgba(60, 40, 20, .20),
+      inset -3px -3px 8px rgba(255, 255, 255, .55);
+
+    --r-lg: 24px;
+    --r-md: 20px;
+    --r-sm: 16px;
+    --r-chip: 12px;
+
+    --s1: 8px;
+    --s2: 16px;
+    --s3: 24px;
+    --s4: 32px;
+    --s6: 48px;
+    --s8: 64px;
+
+    --font: "Pretendard Variable", Pretendard, SUIT, Inter, "Noto Sans KR",
+            system-ui, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "Cascadia Code", Consolas, "D2Coding", monospace;
+
+    --ease: cubic-bezier(.4, 0, .2, 1);
+    --dur: 180ms;
+
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 블록 간격을 하나로 통일하면 위계가 사라진다.
+     기본 32px 위에 margin 을 더해 32 / 48 / 64 세 단계를 만든다. */
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--s4) var(--s4) var(--s8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s4);
+  }
+
+  .panes { margin-top: var(--s2); }
+  .note { margin-top: var(--s4); }
+
+  /* ---------- shared clay surfaces ---------- */
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--clay-raise);
+    padding: var(--s3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+  }
+
+  :where(a, button, input, textarea, label, [tabindex]):focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  /* ---------- header ---------- */
+
+  .masthead {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--clay-raise);
+    padding: var(--s4);
+    display: flex;
+    gap: var(--s3);
+    align-items: flex-start;
+  }
+
+  .mark {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, var(--accent) 0%, var(--primary) 62%, var(--primary-hover) 100%);
+    box-shadow:
+      6px 6px 14px var(--sh-dark),
+      -4px -4px 10px var(--sh-light),
+      inset 3px 3px 6px rgba(255, 255, 255, .38),
+      inset -4px -4px 9px rgba(60, 40, 20, .22);
+  }
+
+  .masthead-body { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--text-2);
+    max-width: 68ch;
+    line-height: 1.5;
+  }
+
+  .stamp {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s1) var(--s2);
+    align-self: flex-start;
+    padding: var(--s1) var(--s2);
+    border-radius: var(--r-sm);
+    background: var(--bg);
+    box-shadow: var(--clay-inset);
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  .stamp.warn { box-shadow: var(--clay-inset), 0 0 0 2px var(--primary); color: var(--text); }
+  .stamp b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* ---------- progress steps ---------- */
+
+  .steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    list-style: none;
+  }
+
+  .step {
+    flex: 1 1 200px;
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    min-height: 44px;
+    padding: var(--s1) var(--s2);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    box-shadow: var(--clay-inset);
+    color: var(--text-2);
+    font-size: 16px;
+    font-weight: 500;
+    transition: box-shadow var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .step.done {
+    box-shadow: var(--clay-raise-sm);
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .step-num {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: var(--bg);
+    color: var(--text-2);
+    box-shadow: inset 2px 2px 4px rgba(60, 40, 20, .16);
+  }
+
+  .step.done .step-num {
+    background: var(--accent);
+    color: var(--text);
+    box-shadow: 2px 2px 5px var(--sh-dark), inset 1px 1px 2px rgba(255, 255, 255, .5);
+  }
+
+  /* ---------- layout ---------- */
+
+  .panes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: var(--s3);
+    align-items: start;
+  }
+
+  .pane { display: flex; flex-direction: column; gap: var(--s3); min-width: 0; }
+  .pane.out { position: sticky; top: var(--s3); }
+
+  .field { display: flex; flex-direction: column; gap: var(--s2); }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1.4;
+  }
+
+  .hint { font-size: 16px; color: var(--text-2); line-height: 1.5; }
+  .hint b { color: var(--text); font-weight: 700; }
+
+  /* ---------- inputs ---------- */
+
+  textarea {
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--bg);
+    border: none;
+    border-radius: var(--r-md);
+    box-shadow: var(--clay-inset);
+    padding: var(--s3);
+    min-height: 200px;
+    resize: vertical;
+    width: 100%;
+  }
+
+  textarea::placeholder { color: var(--text-2); opacity: .85; }
+
+  input[type="text"] {
+    font-family: var(--font);
+    font-size: 16px;
+    color: var(--text);
+    background: var(--bg);
+    border: none;
+    border-radius: var(--r-sm);
+    box-shadow: var(--clay-inset);
+    padding: var(--s1) var(--s2);
+    min-height: 44px;
+    min-width: 0;
+    flex: 1 1 180px;
+  }
+
+  input[type="text"]:disabled { opacity: .45; }
+
+  /* ---------- problem type cards ---------- */
+
+  .types { display: flex; flex-direction: column; gap: var(--s1); }
+
+  .type {
+    display: block;
+    position: relative;
+    min-height: 72px;
+    padding: var(--s2);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: var(--clay-raise-sm);
+    cursor: pointer;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+
+  .type:hover { box-shadow: var(--clay-raise-hi); transform: translateY(-1px); }
+  .type:active { box-shadow: var(--clay-press); transform: scale(.98); }
+
+  .type:focus-within { outline: 3px solid var(--primary); outline-offset: 3px; }
+
+  .type.on {
+    background: linear-gradient(0deg, rgba(217, 176, 140, .28), rgba(217, 176, 140, .28)), var(--surface);
+    box-shadow: var(--clay-raise-hi), 0 0 0 2px var(--primary);
+  }
+
+  .type input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+
+  .type-head { display: flex; align-items: baseline; gap: var(--s1); flex-wrap: wrap; }
+  .type-name { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+  .type-crit { color: var(--text-2); font-size: 14px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s2); }
+
+  .chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 4px var(--s1);
+    border-radius: var(--r-chip);
+    white-space: nowrap;
+    color: var(--text);
+    background: var(--surface);
+    box-shadow:
+      3px 3px 8px var(--sh-dark),
+      -2px -2px 6px var(--sh-light);
+  }
+
+  .chip.opt { border: 1px dashed var(--primary); }
+  .chip.opt::after { content: " · 조건부"; color: var(--text-2); }
+
+  /* 배제 기법은 색이 아니라 형태로 격하한다 — 파인 칩 + 기호 + 취소선 */
+  .chip.no {
+    background: var(--bg);
+    box-shadow: var(--clay-inset);
+    color: var(--text-2);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .chip.no::before {
+    content: "✕";
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 4px;
+    color: var(--primary-hover);
+    font-weight: 700;
+  }
+
+  /* ---------- segmented tabs ---------- */
+
+  .tabs {
+    display: flex;
+    gap: var(--s1);
+    padding: var(--s1);
+    border-radius: var(--r-sm);
+    background: var(--bg);
+    box-shadow: var(--clay-inset);
+  }
+
+  .tab {
+    flex: 1 1 0;
+    min-height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: box-shadow var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .tab input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .tab:hover { color: var(--text); }
+  .tab:focus-within { outline: 3px solid var(--primary); outline-offset: 3px; }
+
+  .tab.on {
+    background: var(--accent);
+    color: var(--text);
+    font-weight: 700;
+    box-shadow: 4px 4px 10px var(--sh-dark), -2px -2px 6px var(--sh-light);
+  }
+
+  /* ---------- toggles ---------- */
+
+  .row { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s1);
+    min-height: 44px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text);
+  }
+
+  .toggle input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  /* ---------- output ---------- */
+
+  .out-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s2);
+    flex-wrap: wrap;
+  }
+
+  .meta {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  button {
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .005em;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s1);
+    color: var(--text);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--r-sm);
+    padding: var(--s1) var(--s3);
+    cursor: pointer;
+    box-shadow: var(--clay-raise-sm);
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  button:hover { box-shadow: var(--clay-raise-hi); transform: scale(1.02); }
+  button:active { box-shadow: var(--clay-press); transform: scale(.97); }
+
+  button svg { width: 18px; height: 18px; flex: 0 0 auto; }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+    border-radius: var(--r-md);
+    box-shadow: var(--clay-inset);
+    padding: var(--s3);
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 62vh;
+    tab-size: 2;
+  }
+
+  pre.flash { animation: flash 450ms var(--ease); }
+
+  @keyframes flash {
+    from { box-shadow: var(--clay-inset), 0 0 0 2px var(--primary); }
+    to   { box-shadow: var(--clay-inset), 0 0 0 2px rgba(185, 132, 90, 0); }
+  }
+
+  /* ---------- footnote ---------- */
+
+  .note {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--clay-raise);
+    padding: var(--s3);
+    color: var(--text-2);
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    max-width: 88ch;
+  }
+
+  .note b { color: var(--text); font-weight: 700; }
+
+  .note code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 4px var(--s1);
+    box-shadow: inset 2px 2px 4px rgba(60, 40, 20, .12);
+  }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width: 1023px) {
+    .wrap { padding: var(--s3) var(--s3) var(--s6); gap: var(--s3); }
+    .panes { grid-template-columns: minmax(0, 1fr); }
+    .pane.out { position: static; }
+    h1 { font-size: 28px; }
+    .masthead { padding: var(--s3); }
+  }
+
+  @media (max-width: 767px) {
+    .wrap { padding: var(--s2) var(--s2) var(--s6); }
+    h1 { font-size: 24px; }
+    h2 { font-size: 18px; }
+    .masthead { flex-direction: column; gap: var(--s2); padding: var(--s3); }
+    .card, .note { padding: var(--s3); }
+    .step { flex: 1 1 100%; }
+    :root {
+      --clay-raise:
+        6px 6px 14px var(--sh-dark),
+        -5px -5px 12px var(--sh-light),
+        inset 2px 2px 4px rgba(255, 255, 255, .55);
+      --clay-raise-hi:
+        8px 8px 18px var(--sh-dark),
+        -6px -6px 15px var(--sh-light),
+        inset 2px 2px 4px rgba(255, 255, 255, .55);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    button:hover, button:active, .type:hover, .type:active { transform: none; }
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="mark" aria-hidden="true"></div>
+    <div class="masthead-body">
+      <h1>마스터 프롬프트 조립기</h1>
+      <p class="lede">하고 싶은 말을 정리하지 말고 그대로 쓰세요. 지식베이스의 기법 선택 규칙에 따라 조립된 마스터 프롬프트가 나옵니다. 그걸 쓰던 챗에 붙여넣으면, 그 모델이 의도 분석부터 자기비평까지 수행합니다.</p>
+      <div class="stamp" id="stamp">
+        <span>지식베이스 기준일 <b id="kbdate">2026-07-28</b></span>
+        <span id="staleness">갱신은 <b>/research</b> 수동 실행 시에만 이루어집니다</span>
+      </div>
+    </div>
+  </header>
+
+  <ol class="steps" id="steps">
+    <li class="step" id="step1"><span class="step-num">1</span> 하고 싶은 말 쓰기</li>
+    <li class="step done" id="step2"><span class="step-num">2</span> 문제 유형 고르기</li>
+    <li class="step" id="step3"><span class="step-num">3</span> 복사해서 붙여넣기</li>
+  </ol>
+
+  <div class="panes">
+    <div class="pane">
+      <section class="card">
+        <h2><label for="raw">하고 싶은 말</label></h2>
+        <textarea id="raw" placeholder="예: 우리 팀 코드 리뷰가 너무 대충이라 문제야. 지적은 하는데 왜 문제인지를 안 적어서 주니어들이 못 알아듣고, 사소한 스타일 지적이랑 진짜 버그가 섞여 나와서 우선순위도 안 보이고... 뭔가 일관되게 나왔으면 좋겠는데"></textarea>
+        <p class="hint">문장이 정리돼 있지 않아도 됩니다. 맥락이 많을수록 결과가 좋아집니다.</p>
+      </section>
+
+      <section class="card">
+        <h2>문제 유형</h2>
+        <p class="hint">선택한 유형의 행에 있는 기법만 적용됩니다. <b>✕ 취소선</b>이 그어진 기법은 이 유형에서 <b>쓰면 손해</b>라 프롬프트가 명시적으로 금지합니다.</p>
+        <div class="types" id="types"></div>
+      </section>
+
+      <section class="card">
+        <h2>출력</h2>
+        <div class="tabs" id="modetabs">
+          <label class="tab on"><input type="radio" name="mode" value="brief" checked> 간결 · 5섹션</label>
+          <label class="tab"><input type="radio" name="mode" value="full"> 전체 · 10섹션</label>
+        </div>
+        <p class="hint">
+          <b>간결</b> — 모델이 의도 분석·기법 선택·자기비평을 다 하되 과정은 요약만 보여줍니다.
+          받은 프롬프트를 그대로 쓸 생각이면 이쪽입니다.<br>
+          <b>전체</b> — 초안과 개선본을 따로 보여주고 6개 축으로 품질을 채점합니다.
+          받은 프롬프트를 직접 손볼 생각이면 이쪽입니다.<br>
+          <b>갈리는 기준</b>: 결과물만 필요하면 간결, 왜 그렇게 나왔는지가 필요하면 전체.
+          전체는 응답이 3~4배 길어집니다.
+        </p>
+        <div class="row">
+          <label class="toggle"><input type="checkbox" id="targeted"> 특정 모델용</label>
+          <input type="text" id="model" placeholder="예: Claude, GPT-5, Gemini" disabled>
+        </div>
+        <p class="hint">기본은 모델 중립입니다. 특정 모델용을 켜면 그 모델의 관례를 쓰도록 지시합니다.</p>
+      </section>
+    </div>
+
+    <div class="pane out">
+      <section class="card">
+        <div class="out-head">
+          <h2>조립된 프롬프트</h2>
+          <div class="row">
+            <span class="meta" id="meta"></span>
+            <button id="copy" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span id="copylabel">복사</span>
+            </button>
+          </div>
+        </div>
+        <pre id="out"></pre>
+      </section>
+    </div>
+  </div>
+
+  <div class="note">
+    <p><b>이 페이지는 모델이 아닙니다.</b> 추론은 붙여넣은 챗에서 일어납니다. 그래서 API 키도 서버도 필요 없고, 어떤 모델에든 씁니다.</p>
+    <p><b>여기 담긴 지식은 위 기준일에 고정된 스냅샷입니다.</b> 지식베이스는 <code>/research</code>를 직접 실행할 때만 바뀌며, 바뀌면 이 페이지를 다시 배포해야 반영됩니다. 자동으로 최신이 되지 않습니다.</p>
+    <p>채점과 A/B 비교는 이 페이지가 하지 않습니다. 그건 평가 하네스가 있는 <code>/compare</code>의 몫입니다.</p>
+  </div>
+</div>
+
+<script>
+  var KB_DATE = "2026-07-28";
+
+  var PATTERNS = {
+    "output-contract": {
+      when: "출력을 기계가 읽거나 평가해야 할 때. 사실상 항상",
+      never: "자유 형식 대화가 목적일 때"
+    },
+    "role-context-priming": {
+      when: "도메인 지식이나 관점이 답을 바꿀 때",
+      never: "역할이 답에 영향을 주지 않는 단순 변환 작업. 무의미한 토큰만 늘어남"
+    },
+    "chain-of-thought": {
+      when: "중간 단계를 틀리면 최종 답이 틀리는 과제",
+      never: "정답 집합이 고정된 분류·추출. 지연과 비용만 늘고 오히려 과잉 추론으로 오답이 늘 수 있음"
+    },
+    "reflection-self-critique": {
+      when: "초안의 결함을 스스로 찾을 수 있는 과제(글·코드·계획)",
+      never: "정답이 하나뿐인 짧은 과제. 비평 단계가 멀쩡한 답을 흔들어 놓음"
+    },
+    "meta-prompting": {
+      when: "프롬프트나 지시문 자체를 생성할 때",
+      never: "최종 산출물이 프롬프트가 아닐 때"
+    },
+    "llm-as-a-judge": {
+      when: "정답이 하나로 정해지지 않은 산출물을 비교할 때",
+      never: "결정론적으로 검사 가능한 항목. 규칙으로 확인할 수 있는 것을 심사에 맡기면 흔들림만 생김"
+    }
+  };
+
+  var TYPES = [
+    {
+      id: "single",
+      name: "단발 생성",
+      crit: "한 번의 출력으로 끝남. 중간 추론이 필요 없음",
+      use: ["output-contract", "role-context-priming"],
+      opt: [],
+      no: ["chain-of-thought"]
+    },
+    {
+      id: "reasoning",
+      name: "다단계 추론",
+      crit: "중간 단계를 틀리면 답이 틀림 (수학·논리·계획)",
+      use: ["output-contract", "chain-of-thought"],
+      opt: ["reflection-self-critique"],
+      no: []
+    },
+    {
+      id: "classify",
+      name: "분류·추출",
+      crit: "정답 집합이 정해져 있음",
+      use: ["output-contract"],
+      opt: [],
+      no: ["chain-of-thought", "reflection-self-critique"]
+    },
+    {
+      id: "agent",
+      name: "에이전트·도구호출",
+      crit: "도구를 호출하고 결과에 따라 행동이 갈림",
+      use: ["output-contract", "role-context-priming"],
+      opt: ["reflection-self-critique"],
+      no: []
+    },
+    {
+      id: "judge",
+      name: "평가·심사",
+      crit: "다른 산출물에 점수를 매김",
+      use: ["output-contract", "llm-as-a-judge"],
+      opt: [],
+      no: []
+    },
+    {
+      id: "meta",
+      name: "프롬프트 생성",
+      crit: "프롬프트 자체를 만듦",
+      use: ["meta-prompting", "output-contract", "reflection-self-critique"],
+      opt: [],
+      no: []
+    }
+  ];
+
+  var RUBRIC = [
+    ["지시 준수", "모든 지시를 지켰는가"],
+    ["정확성", "사실·논리 오류가 없는가"],
+    ["명확성", "즉시 이해되는가"],
+    ["일반화", "변형 입력에도 견디는가"],
+    ["견고성", "모호하거나 악의적인 입력을 안전하게 처리하는가"],
+    ["간결성", "군더더기가 없는가"]
+  ];
+
+  var BRIEF = [
+    "의도 분석 — 표면 요청과 실제 목적을 각각 한 문장으로",
+    "부족한 정보와 세운 가정 — 답이 갈리는 것만. 관례적 기본값이 있으면 묻지 말고 가정으로 명시",
+    "적용한 기법과 이유 — 넣지 않은 기법과 그 이유도 함께",
+    "생성된 프롬프트",
+    "품질 자평 — 위 [평가 축] 6개 점수와, 3점 이하인 축의 구체적 약점"
+  ];
+
+  var FULL = [
+    "사용자 의도 분석",
+    "숨겨진 요구사항",
+    "부족한 정보",
+    "권장 전략",
+    "적용한 Prompt Engineering 기법",
+    "생성된 Prompt",
+    "Self Review — 6축으로 채점하고 3점 이하인 축마다 구체적 약점을 지목",
+    "개선된 Prompt — Self Review 에서 지목된 것만 수정. 지적되지 않은 부분은 건드리지 않는다",
+    "품질 평가 — 정확성 · 명확성 · 일반화 · 유지보수성 · 확장성 · 재사용성",
+    "향후 개선 아이디어"
+  ];
+
+  var typesEl = document.getElementById("types");
+  var rawEl = document.getElementById("raw");
+  var outEl = document.getElementById("out");
+  var metaEl = document.getElementById("meta");
+  var copyEl = document.getElementById("copy");
+  var copyLabelEl = document.getElementById("copylabel");
+  var targetedEl = document.getElementById("targeted");
+  var modelEl = document.getElementById("model");
+  var modeTabsEl = document.getElementById("modetabs");
+  var selected = "single";
+  var includeOptional = {};
+  var copiedOnce = false;
+
+  function chip(name, kind) {
+    return '<span class="chip ' + kind + '">' + name + "</span>";
+  }
+
+  function renderTypes() {
+    var html = "";
+    for (var i = 0; i < TYPES.length; i++) {
+      var t = TYPES[i];
+      var on = t.id === selected ? " on" : "";
+      var chips = "";
+      var j;
+      for (j = 0; j < t.use.length; j++) chips += chip(t.use[j], "use");
+      for (j = 0; j < t.opt.length; j++) chips += chip(t.opt[j], "opt");
+      for (j = 0; j < t.no.length; j++) chips += chip(t.no[j], "no");
+      html +=
+        '<label class="type' + on + '" data-id="' + t.id + '">' +
+        '<input type="radio" name="ptype" value="' + t.id + '"' + (on ? " checked" : "") + ">" +
+        '<span class="type-head"><span class="type-name">' + t.name + "</span>" +
+        '<span class="type-crit">' + t.crit + "</span></span>" +
+        '<span class="chips">' + chips + "</span>" +
+        "</label>";
+    }
+    typesEl.innerHTML = html;
+  }
+
+  function currentType() {
+    for (var i = 0; i < TYPES.length; i++) {
+      if (TYPES[i].id === selected) return TYPES[i];
+    }
+    return TYPES[0];
+  }
+
+  function activeTechniques(t) {
+    var list = t.use.slice();
+    if (includeOptional[t.id]) {
+      for (var i = 0; i < t.opt.length; i++) list.push(t.opt[i]);
+    }
+    return list;
+  }
+
+  function mode() {
+    var els = document.getElementsByName("mode");
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].checked) return els[i].value;
+    }
+    return "brief";
+  }
+
+  function build() {
+    var t = currentType();
+    var raw = rawEl.value.trim();
+    var body = raw || "(여기에 하고 싶은 말을 쓰세요. 비어 있으면 아래 프롬프트는 예시 골격일 뿐입니다.)";
+    var used = activeTechniques(t);
+    var L = [];
+    var i;
+
+    L.push("당신은 세계 최고 수준의 프롬프트 엔지니어입니다.");
+    L.push("");
+    L.push("아래 [요청]은 사용자가 정리하지 않고 쓴 것입니다. 문장을 그대로 받아들이지 말고,");
+    L.push("표면 요청과 실제 목적을 분리하고 숨은 요구사항까지 추론한 뒤 프롬프트를 만드십시오.");
+    L.push("");
+    L.push("## 요청");
+    L.push('"""');
+    L.push(body);
+    L.push('"""');
+    L.push("");
+    L.push("## 문제 유형");
+    L.push(t.name + " — " + t.crit);
+    L.push("");
+    L.push("## 적용할 기법");
+    for (i = 0; i < used.length; i++) {
+      L.push("- " + used[i] + " — " + PATTERNS[used[i]].when);
+    }
+
+    if (t.no.length) {
+      L.push("");
+      L.push("## 적용하지 않을 기법");
+      L.push("아래는 이 문제 유형에서 쓰면 손해입니다. 쓰지 마십시오.");
+      for (i = 0; i < t.no.length; i++) {
+        L.push("- " + t.no[i] + " — " + PATTERNS[t.no[i]].never);
+      }
+    }
+
+    if (!includeOptional[t.id] && t.opt.length) {
+      L.push("");
+      L.push("## 보류한 기법");
+      for (i = 0; i < t.opt.length; i++) {
+        L.push("- " + t.opt[i] + " — 이 과제에 필요하다고 판단되면 쓰되, 왜 필요한지 밝히십시오.");
+      }
+    }
+
+    L.push("");
+    L.push("## 절차");
+    L.push("1. 의도 분석 — 사용자가 요청한 것과 그것으로 이루려는 것을 분리한다.");
+    L.push("2. 부족한 정보 식별 — 답이 갈리는 것만 묻는다. 최대 3개. 관례적 기본값이 있으면 묻지 말고 가정으로 명시한다.");
+    L.push("3. 생성 — 아래 [형식]을 지켜 프롬프트를 쓴다.");
+    L.push("4. 자기비평 — 아래 [평가 축]으로 스스로 채점하고, 3점 이하인 축마다 구체적 약점을 지목한다.");
+    L.push("5. 개선 — 비평에서 지목된 것만 고친다. 지적되지 않은 부분은 건드리지 않는다.");
+    L.push("");
+    L.push("## 형식");
+    L.push("생성하는 프롬프트는 아래 네 개의 H2 헤더를 이 순서대로 반드시 포함합니다.");
+    L.push("");
+    L.push("## 역할");
+    L.push("## 작업");
+    L.push("## 출력 형식");
+    L.push("## 제약");
+    L.push("");
+    L.push("## 금지");
+    L.push('- "적절히", "알아서", "잘", "적당히", "필요에 따라", "가능하면" 같은 판정 불가능한 표현을 쓰지 않습니다.');
+    L.push("  이런 말은 평가도 재현도 되지 않습니다. 측정 가능한 기준으로 바꾸십시오.");
+    L.push("- 출력 형식을 정하지 않은 채로 끝내지 않습니다.");
+
+    if (targetedEl.checked && modelEl.value.trim()) {
+      L.push("");
+      L.push("## 대상 모델");
+      L.push(modelEl.value.trim() + " 에서 쓸 프롬프트입니다. 그 모델의 관례를 따르십시오.");
+    } else {
+      L.push("- 특정 모델 전용 표현을 쓰지 않습니다. 어느 모델에 넣어도 동작해야 합니다.");
+    }
+
+    L.push("");
+    L.push("## 평가 축 (각 1–5점)");
+    for (i = 0; i < RUBRIC.length; i++) {
+      L.push("- " + RUBRIC[i][0] + " — " + RUBRIC[i][1]);
+    }
+
+    L.push("");
+    L.push("## 응답 형식");
+    var sections = mode() === "full" ? FULL : BRIEF;
+    L.push("당신의 응답은 아래 " + sections.length + "개 섹션을 순서대로, 각각 제목을 달아 출력합니다.");
+    L.push("(생성하는 프롬프트 안의 `## 출력 형식` 헤더와 혼동하지 마십시오. 그것은 산출물의 일부입니다.)");
+    L.push("");
+    for (i = 0; i < sections.length; i++) {
+      L.push(i + 1 + ". " + sections[i]);
+    }
+
+    return L.join("\n");
+  }
+
+  function updateSteps() {
+    var s1 = document.getElementById("step1");
+    var s3 = document.getElementById("step3");
+    if (rawEl.value.trim()) { s1.classList.add("done"); } else { s1.classList.remove("done"); }
+    if (copiedOnce) { s3.classList.add("done"); } else { s3.classList.remove("done"); }
+  }
+
+  function refresh(flash) {
+    var text = build();
+    outEl.textContent = text;
+    var lines = text.split("\n").length;
+    metaEl.textContent = text.length.toLocaleString() + "자 · " + lines + "행";
+    updateSteps();
+    if (flash) {
+      outEl.classList.remove("flash");
+      void outEl.offsetWidth;
+      outEl.classList.add("flash");
+    }
+  }
+
+  typesEl.addEventListener("change", function (e) {
+    if (e.target.name !== "ptype") return;
+    selected = e.target.value;
+    renderTypes();
+    syncOptional();
+    refresh(true);
+  });
+
+  function syncOptional() {
+    var t = currentType();
+    var holder = document.getElementById("optholder");
+    if (holder) holder.remove();
+    if (!t.opt.length) return;
+    var div = document.createElement("div");
+    div.id = "optholder";
+    div.className = "field";
+    var label = document.createElement("label");
+    label.className = "toggle";
+    var box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = !!includeOptional[t.id];
+    box.addEventListener("change", function () {
+      includeOptional[t.id] = box.checked;
+      refresh(true);
+    });
+    label.appendChild(box);
+    label.appendChild(document.createTextNode(" 조건부 기법 포함 — " + t.opt.join(", ")));
+    div.appendChild(label);
+
+    var why = document.createElement("p");
+    why.className = "hint";
+    why.innerHTML =
+      "이 유형에서 <b>선택적으로</b> 쓰는 기법입니다. 켜면 프롬프트가 모델에게 " +
+      "초안을 스스로 비평하고 고치라고 지시합니다.<br>" +
+      "<b>켜는 경우</b>: 글·코드·계획처럼 초안에 고칠 여지가 남는 과제일 때.<br>" +
+      "<b>끄는 경우</b>: 정답이 하나뿐인 짧은 과제일 때. 비평 단계가 멀쩡한 답을 흔듭니다. " +
+      "응답 길이와 토큰도 늘어납니다.";
+    div.appendChild(why);
+
+    typesEl.parentNode.appendChild(div);
+  }
+
+  rawEl.addEventListener("input", function () { refresh(false); });
+
+  modeTabsEl.addEventListener("change", function () {
+    var tabs = modeTabsEl.getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) {
+      var input = tabs[i].getElementsByTagName("input")[0];
+      if (input.checked) { tabs[i].classList.add("on"); } else { tabs[i].classList.remove("on"); }
+    }
+    refresh(true);
+  });
+
+  targetedEl.addEventListener("change", function () {
+    modelEl.disabled = !targetedEl.checked;
+    if (targetedEl.checked) modelEl.focus();
+    refresh(true);
+  });
+
+  modelEl.addEventListener("input", function () { refresh(false); });
+
+  copyEl.addEventListener("click", function () {
+    var text = build();
+    function done() {
+      copyLabelEl.textContent = "복사됨";
+      copiedOnce = true;
+      updateSteps();
+      setTimeout(function () { copyLabelEl.textContent = "복사"; }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        done();
+      } catch (err) {
+        copyLabelEl.textContent = "복사 실패 — 직접 선택하세요";
+        setTimeout(function () { copyLabelEl.textContent = "복사"; }, 2400);
+      }
+      document.body.removeChild(ta);
+    }
+  });
+
+  (function staleness() {
+    var parts = KB_DATE.split("-");
+    var kb = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    var days = Math.floor((Date.now() - kb.getTime()) / 86400000);
+    if (days >= 30) {
+      document.getElementById("stamp").classList.add("warn");
+      document.getElementById("staleness").innerHTML =
+        "지식베이스가 <b>" + days + "일</b> 경과했습니다. <b>/research</b> 를 실행할 시점입니다";
+    }
+  })();
+
+  renderTypes();
+  syncOptional();
+  refresh(false);
+</script>
+
+</body>
+</html>
