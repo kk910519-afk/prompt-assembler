@@ -270,7 +270,9 @@
     border-radius: var(--r-md);
     box-shadow: var(--clay-inset);
     padding: var(--s3);
-    min-height: 200px;
+    /* 「내 상황 찾기」가 첫 화면 안에 들어오도록 낮춘 값.
+       늘리려면 세로로 드래그하면 된다(resize: vertical). */
+    min-height: 160px;
     resize: vertical;
     width: 100%;
   }
@@ -361,6 +363,171 @@
     color: var(--primary-hover);
     font-weight: 700;
   }
+
+  /* ---------- type card: 확장 슬롯 ---------- */
+
+  .type-icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    color: var(--primary);
+  }
+
+  .type-slot { display: block; margin-top: var(--s2); }
+
+  .slot-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--text-2);
+    margin-bottom: 4px;
+  }
+
+  .type-when { color: var(--text-2); font-size: 14px; }
+  .type-when li { margin-left: var(--s2); }
+
+  .type-ex {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .type-ex q { font-style: normal; }
+  .type-ex q::before { content: "\201C"; }
+  .type-ex q::after { content: "\201D"; }
+
+  .type-yield { font-size: 14px; color: var(--text); }
+  .type-yield span { display: block; }
+  .type-yield span::before { content: "→ "; color: var(--primary); }
+  .type-yield span.drop { color: var(--text-2); }
+  .type-yield span.drop::before { content: "✕ "; color: var(--primary-hover); }
+
+  /* ---------- 유형 미선택 상태 ---------- */
+
+  .unset {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    padding: var(--s2);
+    border-radius: var(--r-sm);
+    background: var(--bg);
+    box-shadow: var(--clay-inset);
+    color: var(--text-2);
+    font-size: 16px;
+  }
+
+  button[disabled] {
+    opacity: .45;
+    cursor: not-allowed;
+    box-shadow: var(--clay-inset);
+    transform: none;
+  }
+
+  button[disabled]:hover { box-shadow: var(--clay-inset); transform: none; }
+
+  /* ---------- 내 상황 찾기 (결정 트리) ---------- */
+
+  .finder {
+    width: 100%;
+    min-height: 44px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    text-align: left;
+    padding: var(--s2) var(--s3);
+  }
+
+  .finder .finder-sub {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-2);
+  }
+
+  .wiz { display: flex; flex-direction: column; gap: var(--s2); }
+
+  .wiz-q { font-size: 20px; font-weight: 700; letter-spacing: -.01em; line-height: 1.4; }
+
+  .wiz-opts { display: flex; flex-direction: column; gap: var(--s1); }
+
+  .wiz-opt {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    width: 100%;
+    min-height: 56px;
+    padding: var(--s2);
+    border: none;
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    box-shadow: var(--clay-raise-sm);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .wiz-opt:hover { box-shadow: var(--clay-raise-hi); transform: scale(1.01); }
+  .wiz-opt:active { box-shadow: var(--clay-press); transform: scale(.98); }
+
+  .wiz-opt .n {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--bg);
+    color: var(--text-2);
+    box-shadow: inset 2px 2px 4px rgba(60, 40, 20, .16);
+  }
+
+  .wiz-nav { display: flex; flex-wrap: wrap; gap: var(--s1); }
+
+  .wiz-nav button { font-size: 16px; }
+
+  .wiz-result {
+    padding: var(--s3);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: var(--clay-raise-sm), 0 0 0 2px var(--primary);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+  }
+
+  .wiz-result .picked { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  .wiz-result .why { font-size: 14px; color: var(--text-2); }
+  .wiz-result .why b { color: var(--text); font-weight: 700; }
+
+  /* ---------- 유형 목록 접기 ---------- */
+
+  .types-fold { display: block; }
+
+  .types-fold > summary {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    min-height: 44px;
+    padding: var(--s1) 0;
+    cursor: pointer;
+    color: var(--text-2);
+    font-size: 16px;
+    font-weight: 500;
+    list-style: none;
+  }
+
+  .types-fold > summary::-webkit-details-marker { display: none; }
+  .types-fold > summary::before { content: "▸"; color: var(--primary); }
+  .types-fold[open] > summary::before { content: "▾"; }
+  .types-fold > summary:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
   /* ---------- segmented tabs ---------- */
 
@@ -577,8 +744,19 @@
 
       <section class="card">
         <h2>문제 유형</h2>
-        <p class="hint">선택한 유형의 행에 있는 기법만 적용됩니다. <b>✕ 취소선</b>이 그어진 기법은 이 유형에서 <b>쓰면 손해</b>라 프롬프트가 명시적으로 금지합니다.</p>
-        <div class="types" id="types"></div>
+
+        <button class="finder" id="finder" type="button">
+          <span>내 상황 찾기</span>
+          <span class="finder-sub">유형을 모르겠으면 3번만 답하세요</span>
+        </button>
+
+        <div class="wiz" id="wiz" hidden></div>
+
+        <details class="types-fold" id="typesfold">
+          <summary>직접 고를래요</summary>
+          <p class="hint">선택한 유형의 행에 있는 기법만 적용됩니다. <b>✕ 취소선</b>이 그어진 기법은 이 유형에서 <b>쓰면 손해</b>라 프롬프트가 명시적으로 금지합니다.</p>
+          <div class="types" id="types"></div>
+        </details>
       </section>
 
       <section class="card">
@@ -660,11 +838,36 @@
     }
   };
 
+  /* 기법의 화면 표시 이름. 데이터 구조의 키(지식베이스 파일명)는 바꾸지 않고
+     표시만 한글로 바꾼다. 영어 식별자는 칩의 title 로 남는다. */
+  var LABELS = {
+    "output-contract": "출력 형식 고정",
+    "role-context-priming": "역할·맥락 부여",
+    "chain-of-thought": "단계별 추론",
+    "reflection-self-critique": "자기비평·수정",
+    "meta-prompting": "프롬프트 설계",
+    "llm-as-a-judge": "기준 기반 채점"
+  };
+
+  var ICONS = {
+    doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    branch: '<line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',
+    filter: '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+    terminal: '<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>',
+    scale: '<path d="M12 3v18"/><path d="M5 7h14"/><path d="M3 12l3-5 3 5a3 3 0 0 1-6 0z"/><path d="M15 12l3-5 3 5a3 3 0 0 1-6 0z"/><path d="M8 21h8"/>',
+    wand: '<path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>'
+  };
+
   var TYPES = [
     {
       id: "single",
       name: "단발 생성",
-      crit: "한 번의 출력으로 끝남. 중간 추론이 필요 없음",
+      icon: "doc",
+      crit: "한 번에 결과를 받으면 끝나는 일",
+      when: ["글·문구·번역·요약처럼 중간 과정이 필요 없을 때", "결과물이 짧고 형식이 정해질 때"],
+      examples: ["제품 소개 문구 3개 써줘", "이 문단 영어로 번역해줘", "회의록 요약해줘"],
+      yields: ["역할과 출력 형식이 박힙니다"],
+      drops: ["단계별 추론 지시는 일부러 뺍니다 — 이 유형에선 지연과 비용만 늘고 오답이 늘 수 있습니다"],
       use: ["output-contract", "role-context-priming"],
       opt: [],
       no: ["chain-of-thought"]
@@ -672,7 +875,12 @@
     {
       id: "reasoning",
       name: "다단계 추론",
-      crit: "중간 단계를 틀리면 답이 틀림 (수학·논리·계획)",
+      icon: "branch",
+      crit: "중간을 틀리면 결론이 틀리는 일",
+      when: ["계산·논리·계획처럼 순서가 있는 일", "근거를 확인해야 믿을 수 있는 일"],
+      examples: ["이 조건으로 3개월 일정 짜줘", "이 코드 버그 원인 찾아줘", "세 안 중 뭐가 나은지 근거로 비교해줘"],
+      yields: ["단계를 밟게 지시합니다", "원하면 스스로 검토·수정하는 단계를 더합니다"],
+      drops: [],
       use: ["output-contract", "chain-of-thought"],
       opt: ["reflection-self-critique"],
       no: []
@@ -680,7 +888,12 @@
     {
       id: "classify",
       name: "분류·추출",
-      crit: "정답 집합이 정해져 있음",
+      icon: "filter",
+      crit: "정해진 항목만 뽑아내는 일",
+      when: ["뽑을 항목이 미리 정해져 있을 때", "결과를 표나 JSON으로 받아야 할 때"],
+      examples: ["이 계약서에서 금액·기한·해지조건만 뽑아줘", "문의 내용을 환불/배송/기타로 분류해줘", "이 로그에서 에러 코드만 목록으로"],
+      yields: ["출력 형식을 엄격히 고정합니다"],
+      drops: ["단계별 추론과 자기비평을 뺍니다 — 정답이 정해진 일에선 오히려 흔들립니다"],
       use: ["output-contract"],
       opt: [],
       no: ["chain-of-thought", "reflection-self-critique"]
@@ -688,7 +901,12 @@
     {
       id: "agent",
       name: "에이전트·도구호출",
-      crit: "도구를 호출하고 결과에 따라 행동이 갈림",
+      icon: "terminal",
+      crit: "AI가 도구를 직접 쓰고 결과에 따라 다음 행동이 갈리는 일",
+      when: ["파일·API·명령을 실제로 실행시킬 때", "실패하면 다르게 대응해야 할 때"],
+      examples: ["매일 아침 시트 읽어서 슬랙에 요약 보내줘", "에러 나면 재시도하고 3번 실패하면 알려줘", "이 폴더 파일들 이름 규칙대로 바꿔줘"],
+      yields: ["역할과 권한 범위를 못박습니다", "원하면 실행 전 자기점검 단계를 더합니다"],
+      drops: [],
       use: ["output-contract", "role-context-priming"],
       opt: ["reflection-self-critique"],
       no: []
@@ -696,7 +914,12 @@
     {
       id: "judge",
       name: "평가·심사",
-      crit: "다른 산출물에 점수를 매김",
+      icon: "scale",
+      crit: "다른 결과물에 점수를 매기는 일",
+      when: ["두 결과물 중 뭐가 나은지 정해야 할 때", "채점 기준을 고정해 반복 채점할 때"],
+      examples: ["이 답변 두 개 중 뭐가 나은지 채점해줘", "이 글을 5개 기준으로 평가해줘", "지원서 100장 같은 기준으로 점수 매겨줘"],
+      yields: ["채점 기준과 점수 범위를 고정합니다", "규칙으로 검사 가능한 항목은 심사에서 뺍니다"],
+      drops: [],
       use: ["output-contract", "llm-as-a-judge"],
       opt: [],
       no: []
@@ -704,12 +927,56 @@
     {
       id: "meta",
       name: "프롬프트 생성",
-      crit: "프롬프트 자체를 만듦",
+      icon: "wand",
+      crit: "지시문 자체를 만드는 일",
+      when: ["같은 일을 계속 시킬 틀이 필요할 때", "다른 사람도 쓸 지시문을 만들 때"],
+      examples: ["블로그 자동화용 프롬프트 만들어줘", "Claude Code에 줄 명령서 만들어줘", "Cursor에서 쓸 리팩터링 프롬프트"],
+      yields: ["프롬프트를 만드는 프롬프트로 조립합니다", "초안을 스스로 비평하고 고치는 단계가 들어갑니다"],
+      drops: [],
       use: ["meta-prompting", "output-contract", "reflection-self-critique"],
       opt: [],
       no: []
     }
   ];
+
+  /* 결정 트리. 모든 경로가 TYPES 의 id 하나로 끝난다. 최장 3문항. */
+  var WIZARD = {
+    q1: {
+      q: "무엇을 하려고 하나요?",
+      opts: [
+        { label: "글쓰기 · 번역 · 요약 · 보고서", next: "q2" },
+        { label: "코드 작성", next: "q2" },
+        { label: "자료에서 항목 뽑기 · 분류", next: "q3" },
+        { label: "업무 자동화", next: "q4" },
+        { label: "결과물 채점 · 비교", type: "judge" },
+        { label: "지시문 · 프롬프트 자체 만들기", type: "meta" },
+        { label: "이미지 · 디자인 지시문", type: "single",
+          note: "이미지 생성 지시문도 한 번에 쓰는 텍스트라 단발 생성입니다." },
+        { label: "기타", next: "q2" }
+      ]
+    },
+    q2: {
+      q: "결과를 한 번에 받으면 되나요, 중간 과정이 맞아야 최종 답이 맞나요?",
+      opts: [
+        { label: "한 번에 받으면 됨", type: "single" },
+        { label: "중간이 틀리면 결론도 틀림", type: "reasoning" }
+      ]
+    },
+    q3: {
+      q: "뽑을 항목이 미리 정해져 있나요?",
+      opts: [
+        { label: "정해져 있음 — 표나 JSON으로 받고 싶음", type: "classify" },
+        { label: "정해져 있지 않음 — 읽고 정리해줘", type: "single" }
+      ]
+    },
+    q4: {
+      q: "AI가 도구를 직접 실행하나요? (파일 수정, API 호출, 명령 실행)",
+      opts: [
+        { label: "직접 실행함", type: "agent" },
+        { label: "결과 텍스트만 받음", next: "q2" }
+      ]
+    }
+  };
 
   var RUBRIC = [
     ["지시 준수", "모든 지시를 지켰는가"],
@@ -750,12 +1017,26 @@
   var targetedEl = document.getElementById("targeted");
   var modelEl = document.getElementById("model");
   var modeTabsEl = document.getElementById("modetabs");
-  var selected = "single";
+  var finderEl = document.getElementById("finder");
+  var wizEl = document.getElementById("wiz");
+  var typesFoldEl = document.getElementById("typesfold");
+  var selected = null;
   var includeOptional = {};
   var copiedOnce = false;
+  var wizPath = [];
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
 
   function chip(name, kind) {
-    return '<span class="chip ' + kind + '">' + name + "</span>";
+    return '<span class="chip ' + kind + '" title="' + esc(name) + '">' + esc(LABELS[name] || name) + "</span>";
+  }
+
+  function icon(key) {
+    return '<svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      ICONS[key] + "</svg>";
   }
 
   function renderTypes() {
@@ -768,12 +1049,30 @@
       for (j = 0; j < t.use.length; j++) chips += chip(t.use[j], "use");
       for (j = 0; j < t.opt.length; j++) chips += chip(t.opt[j], "opt");
       for (j = 0; j < t.no.length; j++) chips += chip(t.no[j], "no");
+
+      var when = "";
+      for (j = 0; j < t.when.length; j++) when += "<li>" + esc(t.when[j]) + "</li>";
+
+      var ex = "";
+      for (j = 0; j < t.examples.length; j++) ex += "<q>" + esc(t.examples[j]) + "</q>";
+
+      var yield_ = "";
+      for (j = 0; j < t.yields.length; j++) yield_ += "<span>" + esc(t.yields[j]) + "</span>";
+      for (j = 0; j < t.drops.length; j++) yield_ += '<span class="drop">' + esc(t.drops[j]) + "</span>";
+
       html +=
         '<label class="type' + on + '" data-id="' + t.id + '">' +
         '<input type="radio" name="ptype" value="' + t.id + '"' + (on ? " checked" : "") + ">" +
-        '<span class="type-head"><span class="type-name">' + t.name + "</span>" +
-        '<span class="type-crit">' + t.crit + "</span></span>" +
+        '<span class="type-head">' + icon(t.icon) +
+        '<span class="type-name">' + esc(t.name) + "</span>" +
+        '<span class="type-crit">' + esc(t.crit) + "</span></span>" +
         '<span class="chips">' + chips + "</span>" +
+        '<span class="type-slot"><b class="slot-label">언제 쓰나</b>' +
+        '<ul class="type-when">' + when + "</ul></span>" +
+        '<span class="type-slot"><b class="slot-label">이런 요청일 때</b>' +
+        '<span class="type-ex">' + ex + "</span></span>" +
+        '<span class="type-slot"><b class="slot-label">고르면</b>' +
+        '<span class="type-yield">' + yield_ + "</span></span>" +
         "</label>";
     }
     typesEl.innerHTML = html;
@@ -783,7 +1082,7 @@
     for (var i = 0; i < TYPES.length; i++) {
       if (TYPES[i].id === selected) return TYPES[i];
     }
-    return TYPES[0];
+    return null;
   }
 
   function activeTechniques(t) {
@@ -804,6 +1103,12 @@
 
   function build() {
     var t = currentType();
+    if (!t) {
+      return "문제 유형을 먼저 고르세요.\n\n" +
+        "「내 상황 찾기」를 누르면 3번 안에 정해집니다.\n" +
+        "유형에 따라 넣는 기법과 빼는 기법이 달라지므로,\n" +
+        "고르기 전에는 프롬프트를 조립하지 않습니다.";
+    }
     var raw = rawEl.value.trim();
     var body = raw || "(여기에 하고 싶은 말을 쓰세요. 비어 있으면 아래 프롬프트는 예시 골격일 뿐입니다.)";
     var used = activeTechniques(t);
@@ -896,15 +1201,19 @@
   function updateSteps() {
     var s1 = document.getElementById("step1");
     var s3 = document.getElementById("step3");
+    var s2 = document.getElementById("step2");
     if (rawEl.value.trim()) { s1.classList.add("done"); } else { s1.classList.remove("done"); }
+    if (selected) { s2.classList.add("done"); } else { s2.classList.remove("done"); }
     if (copiedOnce) { s3.classList.add("done"); } else { s3.classList.remove("done"); }
   }
 
   function refresh(flash) {
     var text = build();
+    var ready = !!currentType();
     outEl.textContent = text;
     var lines = text.split("\n").length;
-    metaEl.textContent = text.length.toLocaleString() + "자 · " + lines + "행";
+    metaEl.textContent = ready ? (text.length.toLocaleString() + "자 · " + lines + "행") : "유형 미선택";
+    copyEl.disabled = !ready;
     updateSteps();
     if (flash) {
       outEl.classList.remove("flash");
@@ -916,16 +1225,115 @@
   typesEl.addEventListener("change", function (e) {
     if (e.target.name !== "ptype") return;
     selected = e.target.value;
+    closeWizard();
     renderTypes();
     syncOptional();
     refresh(true);
+  });
+
+  /* ---------- 내 상황 찾기 ---------- */
+
+  function typeById(id) {
+    for (var i = 0; i < TYPES.length; i++) {
+      if (TYPES[i].id === id) return TYPES[i];
+    }
+    return null;
+  }
+
+  function closeWizard() {
+    wizEl.hidden = true;
+    wizEl.innerHTML = "";
+    wizPath = [];
+    finderEl.hidden = false;
+  }
+
+  function openWizard() {
+    wizPath = [];
+    finderEl.hidden = true;
+    wizEl.hidden = false;
+    renderQuestion("q1");
+  }
+
+  function renderQuestion(nodeId) {
+    var node = WIZARD[nodeId];
+    var html = '<p class="wiz-q">' + esc(node.q) + "</p>" + '<div class="wiz-opts">';
+    for (var i = 0; i < node.opts.length; i++) {
+      html +=
+        '<button class="wiz-opt" type="button" data-node="' + nodeId + '" data-i="' + i + '">' +
+        '<span class="n">' + (i + 1) + "</span>" + esc(node.opts[i].label) + "</button>";
+    }
+    html += "</div>" + '<div class="wiz-nav">';
+    if (wizPath.length) html += '<button class="ghost" type="button" data-act="back">이전 질문</button>';
+    html += '<button class="ghost" type="button" data-act="cancel">그만두기</button></div>';
+    wizEl.innerHTML = html;
+    var q = wizEl.querySelector(".wiz-q");
+    if (q) q.setAttribute("tabindex", "-1"), q.focus();
+  }
+
+  function renderWizResult(typeId, note) {
+    var t = typeById(typeId);
+    var why = "";
+    for (var i = 0; i < wizPath.length; i++) {
+      why += (i ? " · " : "") + "<b>" + esc(wizPath[i].label) + "</b>";
+    }
+    wizEl.innerHTML =
+      '<div class="wiz-result">' +
+      '<span class="picked">' + esc(t.name) + "</span>" +
+      '<span class="why">고르신 답: ' + why + "</span>" +
+      (note ? '<span class="why">' + esc(note) + "</span>" : "") +
+      '<span class="why">' + esc(t.crit) + "</span>" +
+      "</div>" +
+      '<div class="wiz-nav">' +
+      '<button type="button" data-act="accept" data-type="' + typeId + '">이 유형으로 진행</button>' +
+      '<button class="ghost" type="button" data-act="restart">다시 고르기</button>' +
+      '<button class="ghost" type="button" data-act="manual">직접 고를래요</button>' +
+      "</div>";
+    var picked = wizEl.querySelector(".picked");
+    if (picked) picked.setAttribute("tabindex", "-1"), picked.focus();
+  }
+
+  finderEl.addEventListener("click", openWizard);
+
+  wizEl.addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+
+    var act = btn.getAttribute("data-act");
+    if (act === "cancel") { closeWizard(); return; }
+    if (act === "restart") { openWizard(); return; }
+    if (act === "back") {
+      var last = wizPath.pop();
+      renderQuestion(last ? last.node : "q1");
+      return;
+    }
+    if (act === "manual") {
+      closeWizard();
+      typesFoldEl.open = true;
+      typesFoldEl.scrollIntoView({ block: "nearest" });
+      return;
+    }
+    if (act === "accept") {
+      selected = btn.getAttribute("data-type");
+      closeWizard();
+      typesFoldEl.open = true;
+      renderTypes();
+      syncOptional();
+      refresh(true);
+      return;
+    }
+
+    var nodeId = btn.getAttribute("data-node");
+    if (!nodeId) return;
+    var opt = WIZARD[nodeId].opts[+btn.getAttribute("data-i")];
+    wizPath.push({ label: opt.label, node: nodeId });
+    if (opt.type) { renderWizResult(opt.type, opt.note); } else { renderQuestion(opt.next); }
   });
 
   function syncOptional() {
     var t = currentType();
     var holder = document.getElementById("optholder");
     if (holder) holder.remove();
-    if (!t.opt.length) return;
+    if (!t || !t.opt.length) return;
     var div = document.createElement("div");
     div.id = "optholder";
     div.className = "field";
