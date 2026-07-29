@@ -10,6 +10,16 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23B9845A'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23D9B08C'/%3E%3C/svg%3E">
 <style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}</style>
 <title>마스터 프롬프트 조립기</title>
+<script>
+  /* 저장된 테마를 첫 페인트 전에 적용한다. 이 조각은 문서 앞쪽에 있어야
+     화면이 한 번 깜빡였다가 바뀌는 일이 없다. */
+  (function () {
+    try {
+      var t = localStorage.getItem("mpg-theme");
+      if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) { /* 저장소를 못 쓰는 환경이면 시스템 설정을 따른다 */ }
+  })();
+</script>
 <style>
   /* ============================================================
      Fired Clay Workbench — Claymorphism design system
@@ -440,6 +450,37 @@
     margin-right: 4px;
     color: var(--primary-hover);
     font-weight: 700;
+  }
+
+  /* ---------- 머리말 액션 줄 ---------- */
+
+  .mh-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s2);
+  }
+
+  .themebtn {
+    min-height: 44px;
+    padding: var(--s1) var(--s2);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--clay-raise-sm);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .themebtn svg { width: 18px; height: 18px; color: var(--primary); }
+  .themebtn .sun { display: none; }
+  .themebtn .moon { display: block; }
+
+  :root[data-theme="dark"] .themebtn .sun { display: block; }
+  :root[data-theme="dark"] .themebtn .moon { display: none; }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .themebtn .sun { display: block; }
+    :root:not([data-theme="light"]) .themebtn .moon { display: none; }
   }
 
   /* ---------- 초보자 도움말 ---------- */
@@ -960,9 +1001,21 @@
     <div class="masthead-body">
       <h1>마스터 프롬프트 조립기</h1>
       <p class="lede">하고 싶은 말을 정리하지 말고 그대로 쓰세요. 지식베이스의 기법 선택 규칙에 따라 조립된 마스터 프롬프트가 나옵니다. 그걸 쓰던 챗에 붙여넣으면, 그 모델이 의도 분석부터 자기비평까지 수행합니다.</p>
-      <div class="stamp" id="stamp">
-        <span>지식베이스 기준일 <b id="kbdate">2026-07-28</b></span>
-        <span id="staleness">갱신은 <b>/research</b> 수동 실행 시에만 이루어집니다</span>
+      <div class="mh-row">
+        <div class="stamp" id="stamp">
+          <span>지식베이스 기준일 <b id="kbdate">2026-07-28</b></span>
+          <span id="staleness">갱신은 <b>/research</b> 수동 실행 시에만 이루어집니다</span>
+        </div>
+        <button class="themebtn" id="themebtn" type="button">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <span id="themelabel">어둡게</span>
+        </button>
       </div>
 
       <details class="help" id="help">
@@ -1877,6 +1930,45 @@
       document.body.removeChild(ta);
     }
   });
+
+  /* ---------- 색 테마 전환 ----------
+     독립 문서(GitHub Pages)에는 호스트가 주는 토글이 없어 직접 둔다.
+     data-theme 을 지정하지 않으면 시스템 설정을 따른다. */
+
+  var themeBtnEl = document.getElementById("themebtn");
+  var themeLabelEl = document.getElementById("themelabel");
+  var darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+  function effectiveTheme() {
+    var attr = document.documentElement.getAttribute("data-theme");
+    if (attr === "dark" || attr === "light") return attr;
+    return darkQuery.matches ? "dark" : "light";
+  }
+
+  function syncThemeButton() {
+    var now = effectiveTheme();
+    /* 라벨은 "지금 무엇인가"가 아니라 "누르면 무엇이 되는가"를 말한다 */
+    themeLabelEl.textContent = now === "dark" ? "밝게" : "어둡게";
+    themeBtnEl.setAttribute("aria-label", now === "dark" ? "밝은 테마로 전환" : "어두운 테마로 전환");
+  }
+
+  themeBtnEl.addEventListener("click", function () {
+    var next = effectiveTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("mpg-theme", next); } catch (e) { /* 저장 못해도 이번 세션엔 적용된다 */ }
+    syncThemeButton();
+  });
+
+  /* 시스템 설정이 바뀌었는데 사용자가 아직 고르지 않았다면 라벨을 맞춘다 */
+  if (darkQuery.addEventListener) darkQuery.addEventListener("change", syncThemeButton);
+
+  /* 이 페이지를 감싼 호스트가 data-theme 을 바꾸는 경우에도 라벨을 맞춘다 */
+  new MutationObserver(syncThemeButton).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+  });
+
+  syncThemeButton();
 
   (function staleness() {
     var parts = KB_DATE.split("-");
