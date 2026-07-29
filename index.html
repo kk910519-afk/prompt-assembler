@@ -190,8 +190,14 @@
     list-style: none;
   }
 
+  .steps > li { flex: 1 1 200px; display: flex; }
+
   .step {
-    flex: 1 1 200px;
+    width: 100%;
+    border: none;
+    font-family: var(--font);
+    text-align: left;
+    cursor: pointer;
     display: flex;
     align-items: center;
     gap: var(--s2);
@@ -205,6 +211,9 @@
     font-weight: 500;
     transition: box-shadow var(--dur) var(--ease), color var(--dur) var(--ease);
   }
+
+  .step:hover { box-shadow: var(--clay-raise-sm); color: var(--text); }
+  .step:active { box-shadow: var(--clay-press); transform: scale(.99); }
 
   .step.done {
     box-shadow: var(--clay-raise-sm);
@@ -363,6 +372,95 @@
     color: var(--primary-hover);
     font-weight: 700;
   }
+
+  /* ---------- 초보자 도움말 ---------- */
+
+  .help { align-self: flex-start; }
+
+  .help > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s1);
+    min-height: 44px;
+    padding: var(--s1) var(--s2);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    box-shadow: var(--clay-raise-sm);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .help > summary::-webkit-details-marker { display: none; }
+  .help > summary::before { content: "?"; color: var(--primary); font-weight: 800; }
+  .help > summary:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+  .help[open] > summary { box-shadow: var(--clay-press); }
+
+  .help-body {
+    margin-top: var(--s2);
+    padding: var(--s3);
+    border-radius: var(--r-md);
+    background: var(--bg);
+    box-shadow: var(--clay-inset);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    max-width: 72ch;
+  }
+
+  .help-body h3 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .help-body p { font-size: 16px; color: var(--text-2); line-height: 1.5; }
+  .help-body p b { color: var(--text); font-weight: 700; }
+
+  .help-ex {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* ---------- 비교 보기 ---------- */
+
+  .cmp { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }
+
+  .cmp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+
+  .cmp-col { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+
+  .cmp-col h3 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--text-2);
+  }
+
+  .cmp-col pre { max-height: 32vh; font-size: 12px; padding: var(--s2); }
+
+  .cmp-table-wrap { overflow-x: auto; }
+
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cmp-table th,
+  .cmp-table td {
+    text-align: left;
+    padding: var(--s1);
+    border-bottom: 1px solid var(--accent);
+    white-space: nowrap;
+  }
+
+  .cmp-table th { color: var(--text-2); font-weight: 700; font-size: 12px; letter-spacing: .06em; }
+  .cmp-table td:first-child { white-space: normal; }
+  .cmp-table tr.changed td { font-weight: 700; color: var(--text); }
+  .cmp-table td.arrow { color: var(--primary); }
 
   /* ---------- type card: 확장 슬롯 ---------- */
 
@@ -694,7 +792,10 @@
     h2 { font-size: 18px; }
     .masthead { flex-direction: column; gap: var(--s2); padding: var(--s3); }
     .card, .note { padding: var(--s3); }
-    .step { flex: 1 1 100%; }
+    .steps > li { flex: 1 1 100%; }
+    /* 좌우 2단으로는 각 열이 132px 까지 눌려 프롬프트를 읽을 수 없다 */
+    .cmp-cols { grid-template-columns: minmax(0, 1fr); }
+    .cmp-col pre { max-height: 26vh; }
     :root {
       --clay-raise:
         6px 6px 14px var(--sh-dark),
@@ -725,13 +826,43 @@
         <span>지식베이스 기준일 <b id="kbdate">2026-07-28</b></span>
         <span id="staleness">갱신은 <b>/research</b> 수동 실행 시에만 이루어집니다</span>
       </div>
+
+      <details class="help" id="help">
+        <summary>프롬프트가 뭔가요?</summary>
+        <div class="help-body">
+          <div>
+            <h3>프롬프트란</h3>
+            <p>AI에게 주는 지시문입니다. 말 그대로 "이렇게 해줘"를 적어둔 문서입니다.</p>
+          </div>
+          <div>
+            <h3>그냥 질문하는 것과 뭐가 다른가요</h3>
+            <p>질문은 한 번 쓰고 버립니다. 프롬프트는 같은 일을 여러 번 시키려고 <b>남겨두는 틀</b>입니다. 그래서 역할·형식·하지 말 것이 적혀 있습니다.</p>
+          </div>
+          <div>
+            <h3>왜 필요한가요</h3>
+            <p>"블로그 글 써줘"라고 하면 매번 길이도 말투도 달라집니다. 형식과 제약을 적어두면 다음에도, 다른 사람이 써도 같은 뼈대가 나옵니다.</p>
+          </div>
+          <div>
+            <h3>언제 쓰면 좋은가요</h3>
+            <p>같은 종류의 일을 <b>두 번 이상</b> 시킬 때. 한 번만 물어볼 거면 그냥 물어보는 게 빠릅니다.</p>
+          </div>
+          <div>
+            <h3>예시</h3>
+            <div class="help-ex">
+              <span>그냥 질문 — "코드 리뷰해줘"</span>
+              <span>프롬프트 — 역할(리뷰어) · 작업(diff를 읽고 지적) · 출력 형식(심각도별 목록) · 제약(스타일 지적 제외) 이 적힌 문서</span>
+            </div>
+            <p>이 도구는 아래쪽 문서를 대신 써줍니다.</p>
+          </div>
+        </div>
+      </details>
     </div>
   </header>
 
   <ol class="steps" id="steps">
-    <li class="step" id="step1"><span class="step-num">1</span> 하고 싶은 말 쓰기</li>
-    <li class="step done" id="step2"><span class="step-num">2</span> 문제 유형 고르기</li>
-    <li class="step" id="step3"><span class="step-num">3</span> 복사해서 붙여넣기</li>
+    <li><button class="step" id="step1" type="button"><span class="step-num">1</span> 하고 싶은 말 쓰기</button></li>
+    <li><button class="step" id="step2" type="button"><span class="step-num">2</span> 문제 유형 고르기</button></li>
+    <li><button class="step" id="step3" type="button"><span class="step-num">3</span> 복사해서 붙여넣기</button></li>
   </ol>
 
   <div class="panes">
@@ -787,6 +918,7 @@
           <h2>조립된 프롬프트</h2>
           <div class="row">
             <span class="meta" id="meta"></span>
+            <button class="ghost" id="cmpbtn" type="button" aria-expanded="false">비교 보기</button>
             <button id="copy" type="button">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="9" y="9" width="13" height="13" rx="2"></rect>
@@ -797,6 +929,7 @@
           </div>
         </div>
         <pre id="out"></pre>
+        <div class="cmp" id="cmp" hidden></div>
       </section>
     </div>
   </div>
@@ -1019,6 +1152,8 @@
   var modeTabsEl = document.getElementById("modetabs");
   var finderEl = document.getElementById("finder");
   var wizEl = document.getElementById("wiz");
+  var cmpEl = document.getElementById("cmp");
+  var cmpBtnEl = document.getElementById("cmpbtn");
   var typesFoldEl = document.getElementById("typesfold");
   var selected = null;
   var includeOptional = {};
@@ -1214,6 +1349,14 @@
     var lines = text.split("\n").length;
     metaEl.textContent = ready ? (text.length.toLocaleString() + "자 · " + lines + "행") : "유형 미선택";
     copyEl.disabled = !ready;
+    /* 유형 미선택이면 조립 결과가 안내문이라 비교할 대상이 없다 */
+    cmpBtnEl.disabled = !ready;
+    if (!ready && !cmpEl.hidden) {
+      cmpEl.hidden = true;
+      cmpBtnEl.textContent = "비교 보기";
+      cmpBtnEl.setAttribute("aria-expanded", "false");
+    }
+    if (!cmpEl.hidden) renderCompare();
     updateSteps();
     if (flash) {
       outEl.classList.remove("flash");
@@ -1229,6 +1372,124 @@
     renderTypes();
     syncOptional();
     refresh(true);
+  });
+
+  /* ---------- 비교 보기 ----------
+     표의 모든 값은 두 텍스트를 실제로 세어서 구한다. 하드코딩 없음.
+     AI 출력 품질은 여기서 측정하지 않는다 — 그건 /compare 가 실제로 돌려봐야 나온다. */
+
+  /* eval/lint.py 의 VAGUE_TERMS 와 같은 목록 */
+  var VAGUE_TERMS = ["적절히", "알아서", "적당히", "잘", "필요에 따라", "가능하면"];
+
+  function countVague(text) {
+    var n = 0;
+    for (var i = 0; i < VAGUE_TERMS.length; i++) {
+      /* 앞뒤가 한글이면 다른 단어의 일부다 ('잘' vs '잘못'). 룩비하인드 없이 처리한다. */
+      var re = new RegExp("(^|[^가-힣])" + VAGUE_TERMS[i] + "(?![가-힣])", "g");
+      var m;
+      while ((m = re.exec(text)) !== null) {
+        n++;
+        if (m.index === re.lastIndex) re.lastIndex++;
+      }
+    }
+    return n;
+  }
+
+  function countBullets(text, heading) {
+    var start = text.indexOf(heading);
+    if (start === -1) return 0;
+    var rest = text.slice(start + heading.length);
+    var end = rest.indexOf("\n## ");
+    var block = end === -1 ? rest : rest.slice(0, end);
+    var lines = block.split("\n");
+    var n = 0;
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf("- ") === 0) n++;
+    }
+    return n;
+  }
+
+  function measure(text) {
+    var axes = text.indexOf("## 평가 축") > -1 ? RUBRIC.length : 0;
+    return {
+      role: text.indexOf("## 역할") > -1,
+      format: text.indexOf("## 출력 형식") > -1,
+      constraints: countBullets(text, "## 금지") + countBullets(text, "## 제약"),
+      /* 조립된 프롬프트는 모호 표현을 지우지 않는다. 원문을 그대로 인용하고,
+         금지어 목록을 실어 모델에게 바꾸라고 지시할 뿐이다. 따라서 조립 결과의
+         모호 표현 개수를 세면 오히려 늘어난다 — 그 숫자는 의미가 없다.
+         대신 "금지 지시가 실렸는가"를 본다. */
+      banBlock: text.indexOf("판정 불가능한 표현") > -1,
+      axes: axes,
+      chars: text.length
+    };
+  }
+
+  function renderCompare() {
+    var raw = rawEl.value.trim();
+    var built = build();
+    var a = measure(raw);
+    var b = measure(built);
+
+    function yn(v) { return v ? "있음" : "없음"; }
+    function row(label, left, right, changed) {
+      return '<tr' + (changed ? ' class="changed"' : "") + "><td>" + esc(label) + "</td>" +
+        "<td>" + esc(left) + '</td><td class="arrow">→</td><td>' + esc(right) + "</td></tr>";
+    }
+
+    var rawVague = countVague(raw);
+
+    var rows =
+      row("역할 정의", yn(a.role), yn(b.role), a.role !== b.role) +
+      row("출력 형식 지정", yn(a.format), yn(b.format), a.format !== b.format) +
+      row("명시된 제약 조건", a.constraints + "개", b.constraints + "개", a.constraints !== b.constraints) +
+      row("모호 표현 금지 지시", yn(a.banBlock), yn(b.banBlock), a.banBlock !== b.banBlock) +
+      row("자기검토 지시", a.axes ? a.axes + "축" : "없음", b.axes ? b.axes + "축" : "없음", a.axes !== b.axes) +
+      row("글자 수", a.chars.toLocaleString() + "자", b.chars.toLocaleString() + "자", true);
+
+    var vagueNote = rawVague
+      ? "쓰신 글에 판정 불가능한 표현이 <b>" + rawVague + "개</b> 있습니다(" +
+        esc(VAGUE_TERMS.join(", ")) + " 중). 조립된 프롬프트는 이 말을 지우지 않습니다 — " +
+        "원문을 그대로 인용하고, 모델에게 측정 가능한 기준으로 바꾸라고 지시합니다."
+      : "쓰신 글에는 판정 불가능한 표현이 없습니다.";
+
+    cmpEl.innerHTML =
+      '<div class="cmp-cols">' +
+      '<div class="cmp-col"><h3>그냥 보낸다면</h3><pre>' +
+      esc(raw || "(입력이 비어 있습니다)") + "</pre></div>" +
+      '<div class="cmp-col"><h3>조립된 프롬프트</h3><pre>' + esc(built) + "</pre></div>" +
+      "</div>" +
+      '<div class="cmp-table-wrap"><table class="cmp-table">' +
+      "<tr><th>항목</th><th>그냥 보낼 때</th><th></th><th>조립 후</th></tr>" +
+      rows + "</table></div>" +
+      '<p class="hint">' + vagueNote + "</p>" +
+      '<p class="hint">이 표는 두 텍스트를 직접 센 값입니다. ' +
+      "AI 출력 품질은 여기서 측정하지 않습니다 — 그건 실제로 돌려봐야 나옵니다.</p>";
+  }
+
+  cmpBtnEl.addEventListener("click", function () {
+    var open = cmpEl.hidden;
+    if (open) renderCompare();
+    cmpEl.hidden = !open;
+    cmpBtnEl.setAttribute("aria-expanded", String(open));
+    cmpBtnEl.textContent = open ? "비교 닫기" : "비교 보기";
+  });
+
+  /* ---------- 진행 단계 스트립: 각 단계가 그 행동으로 데려간다 ---------- */
+
+  document.getElementById("step1").addEventListener("click", function () {
+    rawEl.scrollIntoView({ block: "center" });
+    rawEl.focus();
+  });
+
+  document.getElementById("step2").addEventListener("click", function () {
+    finderEl.scrollIntoView({ block: "center" });
+    if (wizEl.hidden) openWizard();
+  });
+
+  document.getElementById("step3").addEventListener("click", function () {
+    copyEl.scrollIntoView({ block: "center" });
+    copyEl.focus();
   });
 
   /* ---------- 내 상황 찾기 ---------- */
