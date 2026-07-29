@@ -13,51 +13,59 @@
 <style>
   /* ============================================================
      Fired Clay Workbench — Claymorphism design system
-     단일 시각 세계로 확정. 뷰어 테마 토글에도 동일하게 렌더링되도록
-     모든 테마 선택자에 같은 토큰을 정의한다.
+
+     라이트가 원본이고, 다크는 같은 색계열에서 명도만 뒤집어 유도했다.
+     --accent 와 --on-accent 는 두 테마에서 같은 값을 쓴다: 버튼은 어느
+     테마에서든 밝은 점토 조각으로 보여야 하고, 그 위 글자는 어두워야
+     대비가 선다. 명도만 뒤집으면 버튼 글자가 배경색을 따라가 대비가
+     무너지므로 --on-accent 를 별도 토큰으로 분리했다.
      ============================================================ */
 
-  :root,
-  :root[data-theme="dark"],
-  :root[data-theme="light"] {
+  :root {
     --bg: #F7F1E7;
     --surface: #EFE4D2;
     --primary: #B9845A;
     --primary-hover: #A5724E;
     --accent: #D9B08C;
+    --on-accent: #2F2A24;
+    --tint: rgba(217, 176, 140, .28);
     --text: #2F2A24;
     --text-2: #6E6258;
     --border: #DDD2C2;
     --sh-light: rgba(255, 255, 255, 0.6);
     --sh-dark: rgba(60, 40, 20, 0.18);
+    --sh-in-hi: rgba(255, 255, 255, .55);
+    --sh-in-lo: rgba(60, 40, 20, .07);
+    --sh-well-hi: rgba(255, 255, 255, .72);
+    --sh-well-lo: rgba(60, 40, 20, .16);
 
     --clay-raise:
       10px 10px 24px var(--sh-dark),
       -8px -8px 20px var(--sh-light),
-      inset 2px 2px 4px rgba(255, 255, 255, .55),
-      inset -4px -4px 10px rgba(60, 40, 20, .07);
+      inset 2px 2px 4px var(--sh-in-hi),
+      inset -4px -4px 10px var(--sh-in-lo);
 
     /* 최상위 표면(masthead·card·note)과 그 안의 조작 요소를 같은 높이로 두면
        위계가 사라진다. 중첩 요소는 한 단계 낮은 --clay-raise-sm 을 쓴다. */
     --clay-raise-sm:
       6px 6px 14px var(--sh-dark),
       -5px -5px 12px var(--sh-light),
-      inset 2px 2px 4px rgba(255, 255, 255, .55),
-      inset -3px -3px 7px rgba(60, 40, 20, .06);
+      inset 2px 2px 4px var(--sh-in-hi),
+      inset -3px -3px 7px var(--sh-in-lo);
 
     --clay-raise-hi:
       14px 14px 32px var(--sh-dark),
       -10px -10px 26px var(--sh-light),
-      inset 2px 2px 4px rgba(255, 255, 255, .55),
-      inset -4px -4px 10px rgba(60, 40, 20, .07);
+      inset 2px 2px 4px var(--sh-in-hi),
+      inset -4px -4px 10px var(--sh-in-lo);
 
     --clay-inset:
-      inset 6px 6px 14px rgba(60, 40, 20, .16),
-      inset -5px -5px 12px rgba(255, 255, 255, .72);
+      inset 6px 6px 14px var(--sh-well-lo),
+      inset -5px -5px 12px var(--sh-well-hi);
 
     --clay-press:
-      inset 4px 4px 10px rgba(60, 40, 20, .20),
-      inset -3px -3px 8px rgba(255, 255, 255, .55);
+      inset 4px 4px 10px var(--sh-well-lo),
+      inset -3px -3px 8px var(--sh-in-hi);
 
     --r-lg: 24px;
     --r-md: 20px;
@@ -78,6 +86,66 @@
     --ease: cubic-bezier(.4, 0, .2, 1);
     --dur: 180ms;
 
+    color-scheme: light;
+  }
+
+  /* 다크 클레이. 지정된 9색 밖의 색이 필요해 같은 색계열에서 유도했다.
+     새로 추가된 값: --bg #1E1913 · --surface #2A231B · --primary #C99A66 ·
+     --primary-hover #DDB07A · --text-2 #B3A691 · --border #3D3428.
+     --text 는 라이트의 --surface(#EFE4D2)를 그대로 재사용한다. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1E1913;
+      --surface: #2A231B;
+      --primary: #C99A66;
+      --primary-hover: #DDB07A;
+      --text: #EFE4D2;
+      --text-2: #B3A691;
+      --border: #3D3428;
+      --tint: rgba(217, 176, 140, .16);
+      --sh-light: rgba(255, 255, 255, 0.05);
+      --sh-dark: rgba(0, 0, 0, 0.55);
+      --sh-in-hi: rgba(255, 255, 255, .045);
+      --sh-in-lo: rgba(0, 0, 0, .30);
+      --sh-well-hi: rgba(255, 255, 255, .05);
+      --sh-well-lo: rgba(0, 0, 0, .48);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #1E1913;
+    --surface: #2A231B;
+    --primary: #C99A66;
+    --primary-hover: #DDB07A;
+    --text: #EFE4D2;
+    --text-2: #B3A691;
+    --border: #3D3428;
+    --tint: rgba(217, 176, 140, .16);
+    --sh-light: rgba(255, 255, 255, 0.05);
+    --sh-dark: rgba(0, 0, 0, 0.55);
+    --sh-in-hi: rgba(255, 255, 255, .045);
+    --sh-in-lo: rgba(0, 0, 0, .30);
+    --sh-well-hi: rgba(255, 255, 255, .05);
+    --sh-well-lo: rgba(0, 0, 0, .48);
+    color-scheme: dark;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #F7F1E7;
+    --surface: #EFE4D2;
+    --primary: #B9845A;
+    --primary-hover: #A5724E;
+    --text: #2F2A24;
+    --text-2: #6E6258;
+    --border: #DDD2C2;
+    --tint: rgba(217, 176, 140, .28);
+    --sh-light: rgba(255, 255, 255, 0.6);
+    --sh-dark: rgba(60, 40, 20, 0.18);
+    --sh-in-hi: rgba(255, 255, 255, .55);
+    --sh-in-lo: rgba(60, 40, 20, .07);
+    --sh-well-hi: rgba(255, 255, 255, .72);
+    --sh-well-lo: rgba(60, 40, 20, .16);
     color-scheme: light;
   }
 
@@ -103,7 +171,8 @@
   }
 
   .panes { margin-top: var(--s2); }
-  .note { margin-top: var(--s4); }
+  .flow { margin-top: var(--s4); }
+  .note { margin-top: var(--s2); }
 
   /* ---------- shared clay surfaces ---------- */
 
@@ -144,8 +213,8 @@
     box-shadow:
       6px 6px 14px var(--sh-dark),
       -4px -4px 10px var(--sh-light),
-      inset 3px 3px 6px rgba(255, 255, 255, .38),
-      inset -4px -4px 9px rgba(60, 40, 20, .22);
+      inset 3px 3px 6px rgba(255, 255, 255, .35),
+      inset -4px -4px 9px rgba(60, 40, 20, .25);
   }
 
   .masthead-body { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
@@ -233,13 +302,13 @@
     font-variant-numeric: tabular-nums;
     background: var(--bg);
     color: var(--text-2);
-    box-shadow: inset 2px 2px 4px rgba(60, 40, 20, .16);
+    box-shadow: inset 2px 2px 4px var(--sh-well-lo);
   }
 
   .step.done .step-num {
     background: var(--accent);
-    color: var(--text);
-    box-shadow: 2px 2px 5px var(--sh-dark), inset 1px 1px 2px rgba(255, 255, 255, .5);
+    color: var(--on-accent);
+    box-shadow: 2px 2px 5px var(--sh-dark), inset 1px 1px 2px rgba(255, 255, 255, .35);
   }
 
   /* ---------- layout ---------- */
@@ -326,7 +395,7 @@
   .type:focus-within { outline: 3px solid var(--primary); outline-offset: 3px; }
 
   .type.on {
-    background: linear-gradient(0deg, rgba(217, 176, 140, .28), rgba(217, 176, 140, .28)), var(--surface);
+    background: linear-gradient(0deg, var(--tint), var(--tint)), var(--surface);
     box-shadow: var(--clay-raise-hi), 0 0 0 2px var(--primary);
   }
 
@@ -503,6 +572,74 @@
   .type-yield span.drop { color: var(--text-2); }
   .type-yield span.drop::before { content: "✕ "; color: var(--primary-hover); }
 
+  /* ---------- 유형별 사용 전/후 (선택된 카드에만) ---------- */
+
+  .type-ba {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    margin-top: var(--s2);
+    padding: var(--s2);
+    border-radius: var(--r-sm);
+    background: var(--bg);
+    box-shadow: var(--clay-inset);
+    font-size: 14px;
+  }
+
+  .ba-row { display: flex; flex-direction: column; gap: 4px; }
+  .ba-row b { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--text-2); }
+  .ba-row span { color: var(--text); }
+
+  /* ---------- Before / After 도해 ---------- */
+
+  .flow {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--clay-raise);
+    padding: var(--s3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+  }
+
+  .flow-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+
+  .flow-col { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+
+  .flow-col h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .flow-step {
+    padding: var(--s2);
+    border-radius: var(--r-sm);
+    background: var(--bg);
+    box-shadow: var(--clay-inset);
+    font-size: 14px;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .flow-step.made {
+    background: var(--surface);
+    box-shadow: var(--clay-raise-sm);
+  }
+
+  .flow-step.end { font-weight: 700; }
+
+  .flow-arrow {
+    text-align: center;
+    color: var(--primary);
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .flow-why { font-size: 16px; color: var(--text-2); line-height: 1.5; max-width: 72ch; }
+  .flow-why b { color: var(--text); font-weight: 700; }
+
   /* ---------- 유형 미선택 상태 ---------- */
 
   .unset {
@@ -584,7 +721,7 @@
     font-weight: 700;
     background: var(--bg);
     color: var(--text-2);
-    box-shadow: inset 2px 2px 4px rgba(60, 40, 20, .16);
+    box-shadow: inset 2px 2px 4px var(--sh-well-lo);
   }
 
   .wiz-nav { display: flex; flex-wrap: wrap; gap: var(--s1); }
@@ -657,7 +794,7 @@
 
   .tab.on {
     background: var(--accent);
-    color: var(--text);
+    color: var(--on-accent);
     font-weight: 700;
     box-shadow: 4px 4px 10px var(--sh-dark), -2px -2px 6px var(--sh-light);
   }
@@ -710,7 +847,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--s1);
-    color: var(--text);
+    color: var(--on-accent);
     background: var(--accent);
     border: none;
     border-radius: var(--r-sm);
@@ -773,7 +910,7 @@
     background: var(--bg);
     border-radius: 8px;
     padding: 4px var(--s1);
-    box-shadow: inset 2px 2px 4px rgba(60, 40, 20, .12);
+    box-shadow: inset 2px 2px 4px var(--sh-well-lo);
   }
 
   /* ---------- responsive ---------- */
@@ -795,16 +932,17 @@
     .steps > li { flex: 1 1 100%; }
     /* 좌우 2단으로는 각 열이 132px 까지 눌려 프롬프트를 읽을 수 없다 */
     .cmp-cols { grid-template-columns: minmax(0, 1fr); }
+    .flow-cols { grid-template-columns: minmax(0, 1fr); }
     .cmp-col pre { max-height: 26vh; }
     :root {
       --clay-raise:
         6px 6px 14px var(--sh-dark),
         -5px -5px 12px var(--sh-light),
-        inset 2px 2px 4px rgba(255, 255, 255, .55);
+        inset 2px 2px 4px var(--sh-in-hi);
       --clay-raise-hi:
         8px 8px 18px var(--sh-dark),
         -6px -6px 15px var(--sh-light),
-        inset 2px 2px 4px rgba(255, 255, 255, .55);
+        inset 2px 2px 4px var(--sh-in-hi);
     }
   }
 
@@ -934,6 +1072,31 @@
     </div>
   </div>
 
+  <section class="flow">
+    <h2>조립하면 뭐가 달라지나요</h2>
+    <div class="flow-cols">
+      <div class="flow-col">
+        <h3>그냥 보낼 때</h3>
+        <div class="flow-step">"게임 만들어줘"</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">AI</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step end">장르도 분량도 매번 다름</div>
+      </div>
+      <div class="flow-col">
+        <h3>조립해서 보낼 때</h3>
+        <div class="flow-step">"게임 만들어줘"</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step made">유형 판정 · 기법 선택<br>형식·제약 부착</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">AI</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step end">요청한 형식대로 매번 같은 뼈대</div>
+      </div>
+    </div>
+    <p class="flow-why">결과가 안정되는 이유는 AI가 똑똑해져서가 아니라, <b>출력 형식과 제약이 지시문에 적혀 있어서</b> 매번 같은 것을 요구받기 때문입니다. 같은 프롬프트를 다른 사람이 써도, 다음 달에 다시 써도 요구 조건은 그대로입니다.</p>
+  </section>
+
   <div class="note">
     <p><b>이 페이지는 모델이 아닙니다.</b> 추론은 붙여넣은 챗에서 일어납니다. 그래서 API 키도 서버도 필요 없고, 어떤 모델에든 씁니다.</p>
     <p><b>여기 담긴 지식은 위 기준일에 고정된 스냅샷입니다.</b> 지식베이스는 <code>/research</code>를 직접 실행할 때만 바뀌며, 바뀌면 이 페이지를 다시 배포해야 반영됩니다. 자동으로 최신이 되지 않습니다.</p>
@@ -994,6 +1157,11 @@
   var TYPES = [
     {
       id: "single",
+      ba: {
+        raw: "\"제품 소개 문구 써줘\"",
+        guess: "몇 개인지, 몇 자인지, 말투가 무엇인지, 누가 읽는지",
+        fixed: "개수·길이·말투·대상이 문서에 적혀 다음에도 같은 뼈대가 나옵니다"
+      },
       name: "단발 생성",
       icon: "doc",
       crit: "한 번에 결과를 받으면 끝나는 일",
@@ -1007,6 +1175,11 @@
     },
     {
       id: "reasoning",
+      ba: {
+        raw: "\"이 코드 왜 느린지 봐줘\"",
+        guess: "어디부터 볼지, 근거를 보여줄지, 추측과 확인을 구분할지",
+        fixed: "단계를 밟고 근거를 남기게 지시해, 중간이 틀리면 어디서 틀렸는지 보입니다"
+      },
       name: "다단계 추론",
       icon: "branch",
       crit: "중간을 틀리면 결론이 틀리는 일",
@@ -1020,6 +1193,11 @@
     },
     {
       id: "classify",
+      ba: {
+        raw: "\"이 계약서 정리해줘\"",
+        guess: "무엇을 뽑을지, 어떤 형태로 줄지, 없는 항목은 어떻게 표시할지",
+        fixed: "뽑을 항목과 출력 형태가 고정돼 결과를 그대로 표에 넣을 수 있습니다"
+      },
       name: "분류·추출",
       icon: "filter",
       crit: "정해진 항목만 뽑아내는 일",
@@ -1033,6 +1211,11 @@
     },
     {
       id: "agent",
+      ba: {
+        raw: "\"매일 리포트 보내줘\"",
+        guess: "무엇을 읽고 어디로 보낼지, 실패하면 멈출지 재시도할지",
+        fixed: "권한 범위와 실패 시 행동이 적혀 예상 밖 동작이 줄어듭니다"
+      },
       name: "에이전트·도구호출",
       icon: "terminal",
       crit: "AI가 도구를 직접 쓰고 결과에 따라 다음 행동이 갈리는 일",
@@ -1046,6 +1229,11 @@
     },
     {
       id: "judge",
+      ba: {
+        raw: "\"이거 평가해줘\"",
+        guess: "어떤 기준으로, 몇 점 만점으로, 근거를 적을지",
+        fixed: "기준과 점수 범위가 고정돼 다음 채점 결과와 비교할 수 있습니다"
+      },
       name: "평가·심사",
       icon: "scale",
       crit: "다른 결과물에 점수를 매기는 일",
@@ -1059,6 +1247,11 @@
     },
     {
       id: "meta",
+      ba: {
+        raw: "\"프롬프트 만들어줘\"",
+        guess: "누가 쓸지, 어떤 형식으로 끝낼지, 무엇을 금지할지",
+        fixed: "초안을 스스로 비평하고 고치는 단계까지 들어갑니다"
+      },
       name: "프롬프트 생성",
       icon: "wand",
       crit: "지시문 자체를 만드는 일",
@@ -1168,6 +1361,14 @@
     return '<span class="chip ' + kind + '" title="' + esc(name) + '">' + esc(LABELS[name] || name) + "</span>";
   }
 
+  function ba(t) {
+    return '<span class="type-ba">' +
+      '<span class="ba-row"><b>그냥 쓰면</b><span>' + esc(t.ba.raw) + "</span></span>" +
+      '<span class="ba-row"><b>모델이 추측해야 하는 것</b><span>' + esc(t.ba.guess) + "</span></span>" +
+      '<span class="ba-row"><b>조립 후 정해지는 것</b><span>' + esc(t.ba.fixed) + "</span></span>" +
+      "</span>";
+  }
+
   function icon(key) {
     return '<svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
       'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -1208,6 +1409,9 @@
         '<span class="type-ex">' + ex + "</span></span>" +
         '<span class="type-slot"><b class="slot-label">고르면</b>' +
         '<span class="type-yield">' + yield_ + "</span></span>" +
+        /* 사용 전/후는 선택된 카드에만 붙인다. 6장 전부에 붙이면
+           목록이 스캔 불가능할 만큼 길어진다. */
+        (on ? ba(t) : "") +
         "</label>";
     }
     typesEl.innerHTML = html;
